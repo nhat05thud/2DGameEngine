@@ -389,13 +389,17 @@
     <ClInclude Include="libs\lua\lualib.h" />
     <ClInclude Include="libs\sol\sol.hpp" />
     <ClInclude Include="src\AssetStore\AssetStore.h" />
+    <ClInclude Include="src\Components\AnimationComponent.h" />
+    <ClInclude Include="src\Components\BoxColliderComponent.h" />
     <ClInclude Include="src\Components\RigidBodyComponent.h" />
     <ClInclude Include="src\Components\SpriteComponent.h" />
     <ClInclude Include="src\Components\TransformComponent.h" />
     <ClInclude Include="src\ECS\ECS.h" />
     <ClInclude Include="src\Game\Game.h" />
     <ClInclude Include="src\Logger\Logger.h" />
+    <ClInclude Include="src\Systems\AnimationSystem.h" />
     <ClInclude Include="src\Systems\MovementSystem.h" />
+    <ClInclude Include="src\Systems\RenderColliderSystem.h" />
     <ClInclude Include="src\Systems\RenderSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -544,6 +548,7 @@
     <ClCompile Include="src\Game\Game.cpp" />
     <ClCompile Include="src\Logger\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Systems\CollisionSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
