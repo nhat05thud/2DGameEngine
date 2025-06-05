@@ -26,6 +26,7 @@ Game::Game() {
 	isDebug = false;
 	registry = std::make_unique<Registry>();
 	assetStore = std::make_unique<AssetStore>();
+	eventBus = std::make_unique<EventBus>();
 
 	Logger::Log("Game constructor called!");
 }
@@ -220,7 +221,7 @@ void Game::Update() {
 	// Invoke all the systems that need to update
 	registry->GetSystem<MovementSystem>().Update(deltaTime);
 	registry->GetSystem<AnimationSystem>().Update();
-	registry->GetSystem<CollisionSystem>().Update();
+	registry->GetSystem<CollisionSystem>().Update(eventBus);
 }
 
 void Game::Render() {

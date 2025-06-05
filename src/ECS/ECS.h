@@ -43,6 +43,7 @@ class Entity {
 	public:
 		Entity(int id) : id(id) {};
 		Entity(const Entity& entity) = default;
+		void Kill();
 		int GetId() const;
 
 		Entity& operator = (const Entity& other) = default;
@@ -137,7 +138,10 @@ class Registry {
 
 		// Set of entities that are flagged to be added or removed in the next registry Update()
 		std::set<Entity> entitiesToBeAdded;
-		std::set<Entity> entitiesToBeRemoved;
+		std::set<Entity> entitiesToBeKilled;
+
+		// List of free entity ids that were previously removed
+		std::deque<int> freeIds;
 
 	public:
 		Registry() {
@@ -152,6 +156,8 @@ class Registry {
 
 		// Entity management
 		Entity CreateEntity();
+
+		void KillEntity(Entity entity);
 
 		// Component management
 		// Function template to add a component of type TComponent to a given entity
@@ -168,7 +174,10 @@ class Registry {
 
 		// Checks the component signature of an entity and add the entity to the systems
 		// that are interested in it
+
+		// Add and remove entities from their systems
 		void AddEntityToSystems(Entity entity);
+		void RemoveEntityFromSystems(Entity entity);
 
 };
 

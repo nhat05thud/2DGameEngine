@@ -4,6 +4,8 @@
 #include "../ECS/ECS.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/BoxColliderComponent.h"
+#include "../EventBus/EventBus.h"
+#include "../Events/CollisionEvent.h"
 #include <SDL.h>
 
 class CollisionSystem : public System {
@@ -12,7 +14,7 @@ class CollisionSystem : public System {
 			RequireComponent<TransformComponent>();
 			RequireComponent<BoxColliderComponent>();
 		}
-		void Update() {
+		void Update(std::unique_ptr<EventBus>& eventBus) {
 			// TODO:
 			// Check all entities that have a boxcollider
 			// to see if they are colliding with each other
@@ -53,6 +55,7 @@ class CollisionSystem : public System {
 						Logger::Log("Entity " + std::to_string(a.GetId()) + "is colliding with Entity " + std::to_string(b.GetId()));
 
 						// TODO: emit an event
+						eventBus->EmitEvent<CollisionEvent>(a, b);
 					}
 				}
 			}
