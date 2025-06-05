@@ -57,6 +57,11 @@ class EventBus {
 			Logger::Log("EventBus destructor called");
 		}
 
+		// Clears the subscribers list
+		void Reset() {
+			subscribers.clear();
+		}
+
 		//////////////////////////////////////////////////////////////////////////////////////////////////
 		// Subscrite to an event type <T>
 		// In our implementation, a listener subscribes to an event
@@ -81,7 +86,7 @@ class EventBus {
 		void EmitEvent(TArgs&& ...args) {
 			auto handlers = subscribers[typeid(TEvent)].get();
 			if (handlers) {
-				for (auto id = handlers->begin(); it != handlers->end(); it++) {
+				for (auto it = handlers->begin(); it != handlers->end(); it++) {
 					auto handler = it->get();
 					TEvent event(std::forward<TArgs>(args)...);
 					handler->Execute(event);
