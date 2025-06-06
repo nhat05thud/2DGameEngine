@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\6.Pre\2DGameEngine\libs;C:\SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\6.Pre\2DGameEngine\libs\lua;C:\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\libs;.\ziplibs\SDL2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>.\libs\lua;.\ziplibs\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -82,7 +82,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard_C>Default</LanguageStandard_C>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\6.Pre\2DGameEngine\src\Game;D:\6.Pre\2DGameEngine\src\Logger;D:\6.Pre\2DGameEngine\src\ECS;D:\6.Pre\2DGameEngine\src\Components;D:\6.Pre\2DGameEngine\src\Systems;D:\6.Pre\2DGameEngine\src\AssetStore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\src\Game;.\src\Logger;.\src\ECS;.\src\Components;.\src\Systems;.\src\AssetStore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

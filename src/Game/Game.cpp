@@ -182,10 +182,12 @@ void Game::LoadLevel(int level) {
 	// TODO:
 	// Create some entity
 	Entity chopper = registry->CreateEntity();
+	chopper.Tag("player");
 	chopper.AddComponent<TransformComponent>(glm::vec2(50.0, 50.0), glm::vec2(1.0, 1.0), 0.0);
 	chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
 	chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 3, false);
 	chopper.AddComponent<AnimationComponent>(2, 15, true);
+	chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 0, 10000, 0, true);
 	chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
 	chopper.AddComponent<CameraFollowComponent>();
 	chopper.AddComponent<HealthComponent>(100);
@@ -204,6 +206,7 @@ void Game::LoadLevel(int level) {
 	///*registry->AddComponent<TransformComponent>(tank, glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
 	//registry->AddComponent<RigidBodyComponent>(tank, glm::vec2(50.0, 0.0));*/
 	//// EP64, EP65 -> make syntax registry->AddComponent to tank.AddComponent (from registry to from entity)
+	tank.Group("enemies");
 	tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
 	tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
 	tank.AddComponent<SpriteComponent>("tank-image", 32, 32, 2, false);
@@ -213,11 +216,12 @@ void Game::LoadLevel(int level) {
 
 
 	Entity truck = registry->CreateEntity();
+	truck.Group("enemies");
 	truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
 	truck.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
 	truck.AddComponent<SpriteComponent>("truck-image", 32, 32, 1, false);
 	truck.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0));
-	tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 5000, 0, false);
+	truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 5000, 0, false);
 	truck.AddComponent<HealthComponent>(100);
 }
 
@@ -256,6 +260,7 @@ void Game::Update() {
 	// Perform the subscription of the events for all systems
 	registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
 	registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+	registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
 	// Update the registry to process the entities that are waiting to be created/deleted
 	registry->Update();
