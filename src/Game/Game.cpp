@@ -10,6 +10,7 @@
 #include "../Components/CameraFollowComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/ProjectileEmitterComponent.h"
+#include "../Components/TextLabelComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
@@ -20,6 +21,8 @@
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
+#include "../Systems/RenderTextSystem.h"
+#include "../Systems/RenderHealthBarSystem.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
@@ -52,6 +55,11 @@ Game::~Game() {
 void Game::Initialize() {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		Logger::Err("Error Initializing SDL");
+		return;
+	}
+
+	if (TTF_Init() != 0) {
+		Logger::Err("Error Initializing SDL TTF");
 		return;
 	}
 	// TODO: create a windows
@@ -132,6 +140,8 @@ void Game::LoadLevel(int level) {
 	registry->AddSystem<CameraMovementSystem>();
 	registry->AddSystem<ProjectileEmitSystem>();
 	registry->AddSystem<ProjectileLifecycleSystem>();
+	registry->AddSystem<RenderTextSystem>();
+	registry->AddSystem<RenderHealthBarSystem>();
 
 	// Adding assets to the asset store
 	assetStore->AddTexture(renderer, "chopper-image", "./assets/images/chopper-spritesheet.png");
@@ -140,6 +150,10 @@ void Game::LoadLevel(int level) {
 	assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
 	assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
 	assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
+
+	assetStore->AddFont("charriot-font-20", "./assets/fonts/charriot.ttf", 20);
+	assetStore->AddFont("pico8-font-5", "./assets/fonts/pico8.ttf", 5);
+	assetStore->AddFont("pico8-font-10", "./assets/fonts/pico8.ttf", 10);
 
 	// TODO:
 	// Load the tilemap
@@ -165,6 +179,7 @@ void Game::LoadLevel(int level) {
 			mapFile.ignore();
 
 			Entity tile = registry->CreateEntity();
+			tile.Group("tiles");
 			tile.AddComponent<TransformComponent>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)), glm::vec2(tileScale, tileScale), 0.0);
 			tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, 0, false, srcRectX, srcRectY);
 		}
@@ -187,7 +202,8 @@ void Game::LoadLevel(int level) {
 	chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
 	chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 3, false);
 	chopper.AddComponent<AnimationComponent>(2, 15, true);
-	chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 0, 10000, 0, true);
+	chopper.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0));
+	chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 0, 10000, 10, true);
 	chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
 	chopper.AddComponent<CameraFollowComponent>();
 	chopper.AddComponent<HealthComponent>(100);
@@ -211,7 +227,7 @@ void Game::LoadLevel(int level) {
 	tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
 	tank.AddComponent<SpriteComponent>("tank-image", 32, 32, 2, false);
 	tank.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0));
-	tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 5000, 3000, 0, false);
+	tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 5000, 3000, 10, false);
 	tank.AddComponent<HealthComponent>(100);
 
 
@@ -221,8 +237,13 @@ void Game::LoadLevel(int level) {
 	truck.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
 	truck.AddComponent<SpriteComponent>("truck-image", 32, 32, 1, false);
 	truck.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0));
-	truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 5000, 0, false);
+	truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 5000, 10, false);
 	truck.AddComponent<HealthComponent>(100);
+
+	SDL_Color green = { 0, 255, 0 };
+	Entity label = registry->CreateEntity();
+	label.Group("fonts");
+	label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 20, 10.0), "CHOPPER 1.0", "charriot-font-20", green, true);
 }
 
 void Game::Setup() {
@@ -305,6 +326,8 @@ void Game::Render() {
 	// TODO: Render game objects...
 	// Invoke all the systems that need to update
 	registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+	registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
+	registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
 	if (isDebug) {
 		registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
 	}

@@ -129,6 +129,11 @@ void Registry::GroupEntity(Entity entity, const std::string& group) {
 }
 
 bool Registry::EntityBelongsToGroup(Entity entity, const std::string& group) const {
+	//// consider this validation => ???? EP107
+	if (entitiesPerGroup.find(group) == entitiesPerGroup.end()) {
+		return false;
+	}
+	////
 	auto groupEntities = entitiesPerGroup.at(group);
 	return groupEntities.find(entity.GetId()) != groupEntities.end();
 }
@@ -164,9 +169,20 @@ void Registry::Update() {
 	for (auto entity: entitiesToBeKilled) {
 		RemoveEntityFromSystems(entity);
 		entityComponentSignatures[entity.GetId()].reset();
+
+		// Remove the entity from the component pools
+		for (auto pool: componentPools) {
+			if (pool) {
+				pool->RemoveEntityFromPool(entity.GetId());
+			}
+		}
 		
 		// Make the entity id available to be reused
 		freeIds.push_back(entity.GetId());
+
+		// Remove any traces of that entity from the tag/group maps
+		RemoveEntityTag(entity);
+		RemoveEntityGroup(entity);
 	}
 	entitiesToBeKilled.clear();
 }

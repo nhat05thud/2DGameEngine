@@ -40,7 +40,7 @@ class CollisionSystem : public System {
 					auto bCollider = b.GetComponent<BoxColliderComponent>();
 
 					// Perform the AABB collistion check between entities a and b
-					bool collisionHappened = CheclAABBCollision(
+					bool collisionHappened = CheckAABBCollision(
 						aTransform.position.x + aCollider.offset.x,
 						aTransform.position.y + aCollider.offset.y,
 						aCollider.width,
@@ -61,10 +61,10 @@ class CollisionSystem : public System {
 			}
 		}
 
-		bool CheclAABBCollision(double aX, double aY, double aW, double aH, double bX, double bY, double bW, double bH) {
+		bool CheckAABBCollision(double aX, double aY, double aW, double aH, double bX, double bY, double bW, double bH) {
 			return (
 				aX < bX + bW &&
-				aX + aW > bW &&
+				aX + aW > bX &&
 				aY < bY + bH &&
 				aY + aH > bY
 			);
