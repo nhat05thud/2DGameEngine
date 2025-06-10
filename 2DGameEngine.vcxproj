@@ -408,6 +408,7 @@ xcopy /Y /D "$(ProjectDir)\libs\lua\lua53.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\EventBus\EventBus.h" />
     <ClInclude Include="src\Events\KeyPressedEvent.h" />
     <ClInclude Include="src\Game\Game.h" />
+    <ClInclude Include="src\Game\LevelLoader.h" />
     <ClInclude Include="src\Logger\Logger.h" />
     <ClInclude Include="src\Systems\AnimationSystem.h" />
     <ClInclude Include="src\Systems\CameraMovementSystem.h" />
@@ -421,6 +422,7 @@ xcopy /Y /D "$(ProjectDir)\libs\lua\lua53.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\Systems\RenderHealthBarSystem.h" />
     <ClInclude Include="src\Systems\RenderSystem.h" />
     <ClInclude Include="src\Systems\RenderTextSystem.h" />
+    <ClInclude Include="src\Systems\ScriptSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\detail\func_common.inl" />
@@ -565,8 +567,10 @@ xcopy /Y /D "$(ProjectDir)\libs\lua\lua53.dll" "$(OutDir)"</Command>
     <ClCompile Include="libs\imgui\imgui_sdl.cpp" />
     <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\AssetStore\AssetStore.cpp" />
+    <ClCompile Include="src\Components\ScriptComponent.h" />
     <ClCompile Include="src\ECS\ECS.cpp" />
     <ClCompile Include="src\Game\Game.cpp" />
+    <ClCompile Include="src\Game\LevelLoader.cpp" />
     <ClCompile Include="src\Logger\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Systems\CollisionSystem.h" />

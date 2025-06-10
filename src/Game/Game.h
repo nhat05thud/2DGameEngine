@@ -5,7 +5,7 @@
 #include "../AssetStore/AssetStore.h"
 #include "../EventBus/EventBus.h"
 #include <SDL.h>
-//#include <memory>
+#include <sol/sol.hpp>
 
 const int FPS = 60;
 const int MILLISECS_PER_FRAME = 1000 / FPS; // 1s = 1000ms
@@ -19,6 +19,8 @@ class Game {
 		SDL_Renderer* renderer;
 		SDL_Rect camera;
 
+		sol::state lua;
+
 		// use smart pointer
 		std::unique_ptr<Registry> registry; //Registry* registry
 		std::unique_ptr<AssetStore> assetStore;
@@ -29,7 +31,6 @@ class Game {
 		~Game();
 		void Initialize();
 		void Run();
-		void LoadLevel(int level);
 		void Setup();
 		void ProcessInput();
 		void Update();
