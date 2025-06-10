@@ -26,6 +26,20 @@ class RenderSystem: public System {
 				RenderableEntity renderableEntity;
 				renderableEntity.transformComponent = entity.GetComponent<TransformComponent>();
 				renderableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
+
+				// Check if the entities sprite is outside the camera view
+				bool isEntityOutsideCamaraView = (
+					renderableEntity.transformComponent.position.x + (renderableEntity.transformComponent.scale.x * renderableEntity.spriteComponent.width) < camera.x ||
+					renderableEntity.transformComponent.position.x > camera.x + camera.w ||
+					renderableEntity.transformComponent.position.y + (renderableEntity.transformComponent.scale.y * renderableEntity.spriteComponent.height) < camera.y ||
+					renderableEntity.transformComponent.position.y > camera.y + camera.h
+				);
+
+				// Cull sprites that are outside the camera view (and are not fixed)
+				if (isEntityOutsideCamaraView && !renderableEntity.spriteComponent.isFixed) {
+					continue;
+				}
+
 				renderableEntities.emplace_back(renderableEntity);
 			}
 
@@ -68,7 +82,7 @@ class RenderSystem: public System {
 					&dstRect, 
 					transform.rotation, 
 					NULL, 
-					SDL_FLIP_NONE
+					sprite.flip
 				);
 
 				//Logger::Log("Entity id = " + std::to_string(entity.GetId()) + " position is now (" + std::to_string(transform.position.x) + "," + std::to_string(transform.position.y) + ")");

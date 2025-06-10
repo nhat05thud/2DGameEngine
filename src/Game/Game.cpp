@@ -23,10 +23,13 @@
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderTextSystem.h"
 #include "../Systems/RenderHealthBarSystem.h"
+#include "../Systems/RenderGUISystem.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
-#include <iostream>
+#include <imgui/imgui.h>
+#include <imgui/imgui_sdl.h> // render SDL2 (ImGui SDL helper)
+#include <imgui/imgui_impl_sdl.h> // integrate ImGui with SDL
 #include <fstream>
 
 // This is not apply ECS architecture
@@ -86,6 +89,10 @@ void Game::Initialize() {
 		return;
 	}
 
+	// Initialize the imgui context
+	ImGui::CreateContext();
+	ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
+
 	// Initialize the camera view with the entire screen area
 	camera.x = 0;
 	camera.y = 0;
@@ -107,22 +114,34 @@ void Game::Run() {
 void Game::ProcessInput() {
 	SDL_Event sdlEvent;
 	while (SDL_PollEvent(&sdlEvent)) {
+		// ImGui SDL input
+		ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+		ImGuiIO& io = ImGui::GetIO();
+
+		int mouseX, mouseY;
+		const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+
+		io.MousePos = ImVec2(mouseX, mouseY);
+		io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT); // BIT WISE
+		io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT); // BIT WISE
+
+		// Handle core SDL events (close window, key pressed, ...)
 		switch (sdlEvent.type)
 		{
-		case SDL_QUIT:
-			isRunning = false;
-			break;
-		case SDL_KEYDOWN:
-			if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) {
+			case SDL_QUIT:
 				isRunning = false;
-			}
-			if (sdlEvent.key.keysym.sym == SDLK_d) {
-				isDebug = !isDebug;
-			}
-			eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
-			break;
-		default:
-			break;
+				break;
+			case SDL_KEYDOWN:
+				if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) {
+					isRunning = false;
+				}
+				if (sdlEvent.key.keysym.sym == SDLK_d) {
+					isDebug = !isDebug;
+				}
+				eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
+				break;
+			default:
+				break;
 		}
 	
 	};
@@ -142,12 +161,14 @@ void Game::LoadLevel(int level) {
 	registry->AddSystem<ProjectileLifecycleSystem>();
 	registry->AddSystem<RenderTextSystem>();
 	registry->AddSystem<RenderHealthBarSystem>();
+	registry->AddSystem<RenderGUISystem>();
 
 	// Adding assets to the asset store
 	assetStore->AddTexture(renderer, "chopper-image", "./assets/images/chopper-spritesheet.png");
 	assetStore->AddTexture(renderer, "radar-image", "./assets/images/radar.png");
 	assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
+	assetStore->AddTexture(renderer, "tree-image", "./assets/images/tree.png");
 	assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
 	assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
 
@@ -223,8 +244,8 @@ void Game::LoadLevel(int level) {
 	//registry->AddComponent<RigidBodyComponent>(tank, glm::vec2(50.0, 0.0));*/
 	//// EP64, EP65 -> make syntax registry->AddComponent to tank.AddComponent (from registry to from entity)
 	tank.Group("enemies");
-	tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-	tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
+	tank.AddComponent<TransformComponent>(glm::vec2(500.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
+	tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
 	tank.AddComponent<SpriteComponent>("tank-image", 32, 32, 2, false);
 	tank.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0));
 	tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 5000, 3000, 10, false);
@@ -233,12 +254,26 @@ void Game::LoadLevel(int level) {
 
 	Entity truck = registry->CreateEntity();
 	truck.Group("enemies");
-	truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-	truck.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
+	truck.AddComponent<TransformComponent>(glm::vec2(120.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
+	truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
 	truck.AddComponent<SpriteComponent>("truck-image", 32, 32, 1, false);
 	truck.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0));
 	truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 5000, 10, false);
 	truck.AddComponent<HealthComponent>(100);
+
+	Entity treeA = registry->CreateEntity();
+	treeA.Group("obstacles");
+	treeA.AddComponent<TransformComponent>(glm::vec2(600.0, 495.0), glm::vec2(1.0, 1.0), 0.0);
+	treeA.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+	treeA.AddComponent<SpriteComponent>("tree-image", 16, 32, 2, false);
+	treeA.AddComponent<BoxColliderComponent>(16, 32, glm::vec2(0));
+
+	Entity treeB = registry->CreateEntity();
+	treeB.Group("obstacles");
+	treeB.AddComponent<TransformComponent>(glm::vec2(400.0, 495.0), glm::vec2(1.0, 1.0), 0.0);
+	treeB.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+	treeB.AddComponent<SpriteComponent>("tree-image", 16, 32, 2, false);
+	treeB.AddComponent<BoxColliderComponent>(16, 32, glm::vec2(0));
 
 	SDL_Color green = { 0, 255, 0 };
 	Entity label = registry->CreateEntity();
@@ -279,6 +314,7 @@ void Game::Update() {
 	eventBus->Reset();
 
 	// Perform the subscription of the events for all systems
+	registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
 	registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
 	registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
 	registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
@@ -330,6 +366,8 @@ void Game::Render() {
 	registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
 	if (isDebug) {
 		registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
+		
+		registry->GetSystem<RenderGUISystem>().Update(registry, camera);
 	}
 
 	// double buffer renderer (front and back)
@@ -337,6 +375,8 @@ void Game::Render() {
 }
 
 void Game::Destroy() {
+	ImGuiSDL::Deinitialize();
+	ImGui::DestroyContext();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
